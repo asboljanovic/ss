@@ -782,8 +782,19 @@ public:
                             {
                                 split[i] = split[i].substr(0, comma);
                             }
-                            int code = symbol_table.get_offset(split[i]);
-                            out_code += decToHexa(code, false);
+                            if (regex_match(split[i], decimal_regex))
+                            {
+                                stringstream dec(split[i]);
+                                int add = 0;
+                                dec >> add;
+                                out_code += decToHexa(add, false);
+                            } else if(regex_match(split[i], hexa_regex)) {
+                                split[i].erase(0,2);
+                                out_code += split[i];
+                            } else {
+                                int code = symbol_table.get_offset(split[i]);
+                                
+                                out_code += decToHexa(code, false); }
                         }
 
                         continue;
@@ -1364,7 +1375,7 @@ public:
             ret += "03";
             int offset = location_counter - 2;
 
-            ret += r_386_32_code(split[2], offset);
+            ret += r_386_PC32_code(split[2], offset);
             return ret;
         }
         else if (regex_match(inst, ldrstr_regMEM_symbol_regex)) // ldr r0, [r1 + sale]
